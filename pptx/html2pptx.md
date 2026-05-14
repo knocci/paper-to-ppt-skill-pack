@@ -43,9 +43,12 @@ Every HTML slide must include proper body dimensions:
 
 **NEVER use manual bullet symbols (•, -, *, etc.)** - Use `<ul>` or `<ol>` lists instead
 
-**ONLY use web-safe fonts that are universally available:**
-- ✅ Web-safe fonts: `Arial`, `Helvetica`, `Times New Roman`, `Georgia`, `Courier New`, `Verdana`, `Tahoma`, `Trebuchet MS`, `Impact`, `Comic Sans MS`
-- ❌ Wrong: `'Segoe UI'`, `'SF Pro'`, `'Roboto'`, custom fonts - **Might cause rendering issues**
+**Use locally installed fonts. Do NOT depend on remote web fonts:**
+- ✅ Local fonts: `Kalam`, `Patrick Hand`, `FangSong` / `仿宋`, `Cambria Math`, and standard web-safe fonts (`Arial`, `Helvetica`, `Times New Roman`, `Georgia`, `Courier New`, `Verdana`, `Tahoma`, `Trebuchet MS`, `Impact`, `Comic Sans MS`)
+- ❌ Wrong: Remote web fonts (e.g. Google Fonts `@import`) — **Will not work in exported PPTX**
+- If the target font is not installed on the current machine, write the font name into the HTML anyway; PowerPoint will use its own font fallback on open.
+- Use `Cambria Math` or similar math/serif fonts for equations and paper-defined symbols, not handwriting fonts.
+- Use `FangSong` / `仿宋` or system-available Chinese serif fonts for Chinese body text.
 
 ### Styling
 

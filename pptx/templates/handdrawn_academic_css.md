@@ -23,8 +23,12 @@ Important defaults:
   --shadow: 4px 4px 0px 0px #2d2d2d;
   --shadow-sm: 2px 2px 0px 0px #2d2d2d;
   --shadow-lg: 8px 8px 0px 0px #2d2d2d;
-  --wobbly: 255px 15px 225px 15px / 15px 225px 15px 255px;
-  --wobbly-md: 18px 28px 20px 24px / 24px 20px 28px 18px;
+  --wobbly: 14pt;
+  --wobbly-md: 10pt;
+  /* Elliptical border-radius (slash syntax) does not convert to PPTX.
+     Simple pt/px/% values produce uniform rounded corners in PowerPoint.
+     The hand-drawn irregularity is preserved via hard shadows, wobbly borders,
+     and PptxGenJS shape adjustments where needed. */
   --font-heading: "Kalam", "Patrick Hand", "FangSong", "仿宋", "Comic Sans MS", Georgia, serif;
   --font-body: "Patrick Hand", "Kalam", "FangSong", "仿宋", "Comic Sans MS", Georgia, serif;
   --font-cn: "FangSong", "仿宋", serif;
@@ -44,8 +48,12 @@ html, body {
 
 body {
   background-color: var(--paper);
-  background-image: radial-gradient(var(--muted) 1px, transparent 1px);
-  background-size: 24px 24px;
+  /* CSS radial-gradient does not convert to PPTX.
+     Paper texture for final PPTX must use one of:
+     1. Pre-generated PNG: background-image: url('paper-dots.png')
+     2. PptxGenJS native shapes with dot/line/grid patterns
+     3. Flat background-color as fallback
+     The gradient here serves as HTML preview only. */
 }
 
 .slide {
@@ -105,7 +113,9 @@ p, li { font-size: 16pt; line-height: 1.35; }
   border-radius: var(--wobbly-md);
   box-shadow: var(--shadow-sm);
   padding: 12pt 14pt;
-  transform: rotate(-1deg);
+  /* CSS transform (rotate) does not convert to PPTX.
+     For final output, apply slight rotation via PptxGenJS shape rotation
+     or accept flat post-it cards as a clean fallback. */
 }
 
 .visual-raw,
@@ -134,7 +144,7 @@ p, li { font-size: 16pt; line-height: 1.35; }
   justify-content: center;
   background: var(--white);
   border: 2.5pt solid var(--ink);
-  border-radius: 8px 16px 10px 14px / 14px 8px 16px 10px;
+  border-radius: 12pt;
   box-shadow: var(--shadow);
   font-size: 24pt;
 }

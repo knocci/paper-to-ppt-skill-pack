@@ -3,3 +3,15 @@ deep-research
 deep-research-native
 git-workflow
 repo-scan
+
+
+__pycache__/
+*.pyc
+.DS_Store
+node_modules/
+*.pptx
+*.pdf
+docs/
+html_slides/
+thumbnails/
+.claude/
