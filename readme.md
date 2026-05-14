@@ -162,20 +162,23 @@ review_checklist.md
 
 ## Acknowledgements
 
-本项目受到以下开源项目和社区资源启发，特此感谢：
+本项目受到以下开源项目、工具和设计资源启发，特此感谢：
 
-* [Max-astro/paper-reading-skills](https://github.com/Max-astro/paper-reading-skills)
+- [Max-astro/paper-reading-skills](https://github.com/Max-astro/paper-reading-skills)  
   提供了面向论文阅读的 Claude Code skill 思路，尤其是分阶段阅读、结构化理解和中文论文精读流程。
 
-* [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills)
+- [ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills)  
   提供了丰富的 Claude skills 参考，尤其是 document-skills 中的 `pptx` skill，对 PPTX 生成、HTML-to-PPTX、OOXML 编辑和缩略图检查流程有重要启发。
 
-* [Google Fonts](https://fonts.google.com/)
+- [DesignPrompts](https://www.designprompts.dev/)  
+  提供了高质量的设计风格 prompt 参考。本项目中的 hand-drawn academic sketch PPT 风格，受到其 hand-drawn design prompt 的启发，并在此基础上适配了论文汇报、学术图表、公式展示和 PPTX 生成场景。
+
+- [Google Fonts](https://fonts.google.com/)  
   提供 `Kalam` 和 `Patrick Hand` 等开源字体，使 hand-drawn 风格可以更自然地用于学术汇报。
 
-* [PyMuPDF](https://github.com/pymupdf/PyMuPDF)
+- [PyMuPDF](https://github.com/pymupdf/PyMuPDF)  
   可用于 PDF 页面渲染和图像提取，是论文图表提取脚本的重要可选依赖。
 
-感谢开源社区让这些工具、字体、思路和工作流可以被自由学习、组合和改进。
+感谢开源社区让这些工具、字体、设计 prompt、思路和工作流可以被自由学习、组合和改进。
 
 
