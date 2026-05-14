@@ -1,9 +1,3 @@
-````markdown
-# Paper PPT Skills
-
-一组用于 Claude Code 的论文汇报 PPT skills
-
----
 
 ## Installation
 
