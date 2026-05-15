@@ -136,13 +136,15 @@ function addElements(slideData, targetSlide, pres) {
       let imagePath = el.src.startsWith('file://') ? el.src.replace('file://', '') : el.src;
       // On Windows, file:///D:/path becomes /D:/path after removing file:// — strip leading slash
       if (imagePath.match(/^\/[A-Za-z]:[\/\\]/)) { imagePath = imagePath.slice(1); }
-      targetSlide.addImage({
+      const imgOpts = {
         path: imagePath,
         x: el.position.x,
         y: el.position.y,
         w: el.position.w,
         h: el.position.h
-      });
+      };
+      if (el.transparency != null) imgOpts.transparency = el.transparency;
+      targetSlide.addImage(imgOpts);
     } else if (el.type === 'line') {
       targetSlide.addShape(pres.ShapeType.line, {
         x: el.x1,
@@ -576,11 +578,25 @@ async function extractSlideData(page) {
         return;
       }
 
+      // Compute cumulative opacity by walking up the DOM tree
+      const getCumulativeOpacity = (el) => {
+        let opacity = 1;
+        let current = el;
+        while (current && current !== document.body.parentElement) {
+          const style = window.getComputedStyle(current);
+          const elOpacity = parseFloat(style.opacity);
+          if (!isNaN(elOpacity)) opacity *= elOpacity;
+          current = current.parentElement;
+        }
+        return opacity;
+      };
+
       // Extract images
       if (el.tagName === 'IMG') {
         const rect = el.getBoundingClientRect();
         if (rect.width > 0 && rect.height > 0) {
-          elements.push({
+          const cumulativeOpacity = getCumulativeOpacity(el);
+          const imgData = {
             type: 'image',
             src: el.src,
             position: {
@@ -589,7 +605,11 @@ async function extractSlideData(page) {
               w: pxToInch(rect.width),
               h: pxToInch(rect.height)
             }
-          });
+          };
+          if (cumulativeOpacity < 1) {
+            imgData.transparency = Math.round((1 - cumulativeOpacity) * 100);
+          }
+          elements.push(imgData);
           processed.add(el);
           return;
         }

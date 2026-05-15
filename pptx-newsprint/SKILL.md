@@ -365,15 +365,118 @@ multiple_tables:
 
 ### 3.4 Equations and paper-defined symbols
 
+**Fundamental rule:** an equation is not ordinary text. A math font can improve glyph shape, but it cannot perform TeX/MathML layout such as subscripts, superscripts, fractions, operators, constraints, multi-line alignment, or spacing. Do not rely on plain HTML text plus `font-family: Cambria Math` as the primary equation-rendering method.
+
 For equations:
 
-- Prefer the paper's original equation screenshot when reliability matters.
-- If recreating equations, use a math-capable font such as `Cambria Math`.
-- Use italic math font for variables where appropriate.
-- Keep operators, functions, and subscripts readable.
+- Prefer the paper's original equation screenshot when reliability and exact reproduction matter.
+- If recreating equations, write the formula as valid LaTeX and render it to an equation asset before placing it on a slide.
+- Use SVG as the preferred equation asset because it scales cleanly in HTML preview and modern PowerPoint.
+- If SVG insertion is unreliable in the target environment, render a high-resolution transparent PNG fallback at 2x or 3x.
+- Insert equation assets into HTML slides with `<img class="equation-img" src="...">`.
+- Insert equation assets into PPTX with PptxGenJS `addImage`, not as plain text.
+- Use math/scientific fonts only for short inline symbols that do not need full layout.
 - Never use Newsprint display/body/UI fonts for equations, Greek letters, loss functions, model notation, or paper-defined symbols.
-- For inline symbols inside body text, wrap the symbol in a math-font span or use a separate text box with the math font.
-- If an equation cannot be reliably read, use a placeholder and mark `待核实`.
+- If an equation cannot be reliably parsed or rendered, use a visible placeholder and mark `待核实`.
+
+### 3.5 Equation rendering pipeline
+
+Use this pipeline for every recreated formula:
+
+```text
+LaTeX source
+  -> MathJax / LaTeX renderer
+  -> standalone SVG equation asset
+  -> HTML preview uses <img>
+  -> PPTX final uses PptxGenJS addImage
+```
+
+Do **not** write formulas like this in slide HTML:
+
+```html
+<div class="equation">min F_task(T,l) + F_control(tau) s.t. C(T)</div>
+```
+
+Instead, store the formula as LaTeX:
+
+```latex
+\min_{\tau}\; F_{\mathrm{task}}(T,l) + F_{\mathrm{control}}(\tau)
+\quad \mathrm{s.t.}\quad C(T)
+```
+
+Then render it to an asset such as:
+
+```text
+assets/generated/equations/eq_method_objective.svg
+```
+
+And use:
+
+```html
+<img
+  class="equation-img"
+  src="../assets/generated/equations/eq_method_objective.svg"
+  alt="Optimization objective"
+/>
+```
+
+Recommended equation authoring format in handoff files:
+
+```yaml
+equations:
+  - id: eq_method_objective
+    latex: |
+      \min_{\tau}\; F_{\mathrm{task}}(T,l) + F_{\mathrm{control}}(\tau)
+      \quad \mathrm{s.t.}\quad C(T)
+    display: true
+    source_reference: "PDF p.X, Eq. Y"
+```
+
+When creating a deck:
+
+1. Scan `slides_plan.md`, `paper_summary.md`, and `images_needed.md` for formulas and paper-defined symbols.
+2. Convert formula-like plain text into LaTeX only when the meaning is clear.
+3. Write a formula manifest such as `assets/generated/equations/equations.json`.
+4. Render each formula into SVG before generating final slides.
+5. Use equation images in both HTML and PPTX.
+6. Keep all formula source LaTeX in `review_checklist.md` or a generated formula manifest for review.
+7. If conversion is ambiguous, use a placeholder and mark `待核实` instead of guessing.
+
+### 3.6 MathJax helper script
+
+This skill may include or generate a helper script named:
+
+```text
+scripts/render-equations-svg.mjs
+```
+
+Expected command pattern:
+
+```powershell
+cd path\to\output-dir
+npm install @mathjax/src@4
+node path\to\pptx\scripts\render-equations-svg.mjs `
+  --input assets\generated\equations\equations.json `
+  --out assets\generated\equations
+```
+
+Expected `equations.json` format:
+
+```json
+[
+  {
+    "id": "eq_method_objective",
+    "latex": "\\min_{\\tau}\\; F_{\\mathrm{task}}(T,l) + F_{\\mathrm{control}}(\\tau) \\quad \\mathrm{s.t.}\\quad C(T)",
+    "display": true
+  }
+]
+```
+
+Each rendered formula should produce:
+
+```text
+assets/generated/equations/eq_method_objective.svg
+```
 
 ---
 
@@ -480,21 +583,29 @@ p, li, .body {
   font-family: var(--font-cn);
 }
 
-.math, .equation, .symbol, .model-symbol, .latex, .formula {
+.math, .symbol, .model-symbol {
   font-family: var(--font-math);
   font-size: 18pt;
   line-height: 1.2;
   font-style: italic;
 }
 
+/* Full equations should be rendered as SVG/PNG assets, not typed as plain text. */
+.equation-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 .equation-block {
-  font-family: var(--font-math);
-  font-size: 20pt;
-  line-height: 1.25;
   background: var(--white);
   border-top: 2pt solid var(--ink);
   border-bottom: 2pt solid var(--ink);
   padding: 10pt 12pt;
+}
+
+.equation-block .equation-img {
+  width: 100%;
 }
 
 .rule-thin {
@@ -823,7 +934,7 @@ source_reference
 7. Generate one HTML file per slide under `html_slides/`.
 8. Apply the Newsprint editorial CSS tokens.
 9. Convert HTML to PPTX through `html2pptx.js`.
-10. Add figures, charts, tables, highlights, arrows, equations, panel labels, and texture PNGs with PptxGenJS when needed.
+10. Render recreated formulas to SVG/PNG assets before final layout; add figures, charts, tables, highlights, arrows, equation assets, panel labels, and texture PNGs with PptxGenJS when needed.
 11. Save as `report.pptx`.
 12. Generate thumbnails.
 13. Inspect thumbnails and fix issues.
@@ -888,12 +999,14 @@ Use:
 
 Use:
 
-- Formula screenshot or recreated formula only if reliable.
-- Math font for any recreated symbols or equations.
+- Formula screenshot when exact paper reproduction matters.
+- Recreated formula only when valid LaTeX is available or can be confidently reconstructed.
+- Render recreated formulas to SVG or high-resolution transparent PNG before inserting them.
+- Do not place raw formula text directly in HTML or PPTX text boxes.
 - Right side: symbol explanations at 14 pt or larger.
 - Bottom note: `Why it matters`.
 
-If formula is unreadable, use placeholder and mark `待核实`.
+If formula is unreadable or ambiguous, use placeholder and mark `待核实`.
 
 ### 8.7 Experiment setup slide
 
@@ -968,7 +1081,7 @@ Before saying the PPT is done, verify:
 - `Inter` appears in metadata, labels, and captions where possible.
 - `JetBrains Mono` appears in data/date/code/edition labels where possible.
 - `FangSong` / `仿宋` is used for Chinese text where possible.
-- Equations and paper-defined symbols use a math/scientific font, not Newsprint display/body/UI fonts.
+- Recreated equations are rendered as SVG/PNG equation assets, not plain text; short inline symbols use a math/scientific font, not Newsprint display/body/UI fonts.
 - No newly created text is smaller than 14 pt.
 - Text does not overflow.
 - Figures are not stretched beyond recognition.
